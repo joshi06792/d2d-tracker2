@@ -43,13 +43,77 @@ function inr(n){ return '₹' + Number(n||0).toLocaleString('en-IN'); }
 
 /* ================= tabs ================= */
 
-document.getElementById('tabs').addEventListener('click', (e) => {
+const tabsNav = document.getElementById('tabs');
+const tabIndicator = document.createElement('span');
+tabIndicator.className = 'tab-indicator';
+tabsNav.appendChild(tabIndicator);
+
+function moveIndicatorTo(btn){
+  if(window.innerWidth <= 860 || !btn) return; // mobile uses the CSS underline instead
+  tabIndicator.style.transform = `translateY(${btn.offsetTop}px)`;
+  tabIndicator.style.height = btn.offsetHeight + 'px';
+}
+
+tabsNav.addEventListener('click', (e) => {
   const btn = e.target.closest('.tab');
   if(!btn) return;
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('is-active', t === btn));
   document.querySelectorAll('.panel').forEach(p => p.classList.toggle('is-active', p.id === 'panel-' + btn.dataset.tab));
+  moveIndicatorTo(btn);
   if(btn.dataset.tab === 'dashboard') renderDashboard();
 });
+window.addEventListener('resize', () => moveIndicatorTo(document.querySelector('.tab.is-active')));
+window.addEventListener('load', () => moveIndicatorTo(document.querySelector('.tab.is-active')));
+// in case fonts/layout shift after load
+setTimeout(() => moveIndicatorTo(document.querySelector('.tab.is-active')), 300);
+
+/* ================= custom cursor ================= */
+
+(function initCursor(){
+  if(!window.matchMedia('(pointer: fine)').matches) return; // skip on touch devices
+  document.documentElement.classList.add('has-custom-cursor');
+  const dot = document.createElement('div');
+  dot.className = 'cursor-dot';
+  const ring = document.createElement('div');
+  ring.className = 'cursor-ring';
+  document.body.append(dot, ring);
+
+  let dx = 0, dy = 0;
+  window.addEventListener('mousemove', (e) => {
+    dx = e.clientX; dy = e.clientY;
+    dot.style.transform = `translate(${dx}px, ${dy}px) translate(-50%,-50%)`;
+    ring.style.transform = `translate(${dx}px, ${dy}px) translate(-50%,-50%)`;
+    dot.classList.remove('cursor-hide');
+    ring.classList.remove('cursor-hide');
+  });
+  document.addEventListener('mouseleave', () => { dot.classList.add('cursor-hide'); ring.classList.add('cursor-hide'); });
+  window.addEventListener('mousedown', () => ring.classList.add('is-down'));
+  window.addEventListener('mouseup', () => ring.classList.remove('is-down'));
+
+  const hoverSelector = 'button, a, select, input, textarea, label, .tab, .chip, .yn button, [data-del-checkin], [data-del-journal], [data-del-expense]';
+  document.addEventListener('mouseover', (e) => {
+    ring.classList.toggle('is-hover', !!e.target.closest(hoverSelector));
+  });
+})();
+
+/* ================= number count-up ================= */
+
+function animateNumber(el, to, { prefix = '', duration = 500 } = {}){
+  const from = Number((el.textContent || '0').replace(/[^\d.-]/g, '')) || 0;
+  to = Number(to) || 0;
+  if(from === to){ el.textContent = prefix + to.toLocaleString('en-IN'); return; }
+  const start = performance.now();
+  el.classList.add('is-bumped');
+  function tick(now){
+    const p = Math.min(1, (now - start) / duration);
+    const eased = 1 - Math.pow(1 - p, 3);
+    const val = Math.round(from + (to - from) * eased);
+    el.textContent = prefix + val.toLocaleString('en-IN');
+    if(p < 1) requestAnimationFrame(tick);
+    else el.classList.remove('is-bumped');
+  }
+  requestAnimationFrame(tick);
+}
 
 /* ================= check-in form ================= */
 
@@ -165,12 +229,12 @@ function renderCheckinHistory(){
   const box = document.getElementById('ciHistory');
   const dates = Object.keys(checkins).sort().reverse().slice(0, 20);
   if(dates.length === 0){ box.innerHTML = '<p class="empty-note">No check-ins yet. Today\'s entry will show up here.</p>'; return; }
-  box.innerHTML = dates.map(date => {
+  box.innerHTML = dates.map((date, i) => {
     const e = checkins[date];
     const clean = isCleanDay(e);
     const spentBit = e.amountSpent > 0 ? `<span class="tag tag-slip">${inr(e.amountSpent)} spent</span>` : '';
     const noteBits = [e.struggle, e.improve].filter(Boolean);
-    return `<div class="entry-card">
+    return `<div class="entry-card" style="animation-delay:${(i*0.03).toFixed(2)}s">
       <div class="entry-head">
         <span class="entry-date">${prettyDate(date)}</span>
         <div class="entry-tags">
@@ -234,8 +298,8 @@ function renderJournal(){
   if(filterCat) list = list.filter(j => j.category === filterCat);
   if(q) list = list.filter(j => j.text.toLowerCase().includes(q) || j.category.toLowerCase().includes(q));
   if(list.length === 0){ box.innerHTML = '<p class="empty-note">Nothing here yet.</p>'; return; }
-  box.innerHTML = list.map(j => `
-    <div class="entry-card">
+  box.innerHTML = list.map((j, i) => `
+    <div class="entry-card" style="animation-delay:${(i*0.03).toFixed(2)}s">
       <div class="entry-head">
         <span class="entry-date">${prettyDate(j.date)}</span>
         <div class="entry-tags">
@@ -311,8 +375,8 @@ function renderExpenses(){
     <div><b>${expenses.filter(x=>x.done).length}</b>purchased</div>`;
 
   if(list.length === 0){ box.innerHTML = '<p class="empty-note">Nothing planned yet.</p>'; return; }
-  box.innerHTML = list.map(x => `
-    <div class="entry-card${x.done ? ' is-done' : ''}" style="${x.done ? 'opacity:.55' : ''}">
+  box.innerHTML = list.map((x, i) => `
+    <div class="entry-card${x.done ? ' is-done' : ''}" style="animation-delay:${(i*0.03).toFixed(2)}s;${x.done ? 'opacity:.55' : ''}">
       <div class="entry-head">
         <span class="entry-date">${escapeHtml(x.description)}</span>
         <div class="entry-tags">
@@ -375,7 +439,7 @@ function computeStreaks(){
 }
 
 function renderRailStreak(){
-  document.getElementById('railStreak').textContent = computeStreaks().current;
+  animateNumber(document.getElementById('railStreak'), computeStreaks().current);
 }
 
 /* ================= dashboard ================= */
@@ -385,8 +449,8 @@ function killChart(key){ if(charts[key]){ charts[key].destroy(); delete charts[k
 
 function renderDashboard(){
   const { current, best } = computeStreaks();
-  document.getElementById('dCurrentStreak').textContent = current;
-  document.getElementById('dBestStreak').textContent = best;
+  animateNumber(document.getElementById('dCurrentStreak'), current);
+  animateNumber(document.getElementById('dBestStreak'), best);
 
   const monthPrefix = todayStr().slice(0,7);
   let monthTotal = 0, allTotal = 0;
@@ -394,8 +458,8 @@ function renderDashboard(){
     allTotal += (e.amountSpent||0);
     if(e.date.startsWith(monthPrefix)) monthTotal += (e.amountSpent||0);
   });
-  document.getElementById('dMoneyMonth').textContent = inr(monthTotal);
-  document.getElementById('dMoneyTotal').textContent = inr(allTotal);
+  animateNumber(document.getElementById('dMoneyMonth'), monthTotal, { prefix: '₹' });
+  animateNumber(document.getElementById('dMoneyTotal'), allTotal, { prefix: '₹' });
 
   renderHeatmap();
   renderUrgeChart();
@@ -410,12 +474,14 @@ function renderHeatmap(){
   const days = 84;
   let html = '';
   const end = todayStr();
+  let idx = 0;
   for(let i = days-1; i >= 0; i--){
     const d = addDays(end, -i);
     const e = checkins[d];
     let cls = '';
     if(e) cls = isCleanDay(e) ? 'hm-good' : 'hm-slip';
-    html += `<div class="hm-cell ${cls}" title="${d}"></div>`;
+    const delay = (idx++ * 0.006).toFixed(3);
+    html += `<div class="hm-cell ${cls}" title="${d}" style="animation-delay:${delay}s"></div>`;
   }
   box.innerHTML = html;
 }
