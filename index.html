@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>D2D — Day to Day</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- Side rail -->
+  <aside class="rail">
+    <div class="rail-top">
+      <div class="wordmark">D2D</div>
+      <div class="wordmark-sub">day to day</div>
+    </div>
+
+    <nav class="tabs" id="tabs">
+      <button class="tab is-active" data-tab="checkin">
+        <span class="tab-label">Check-in</span>
+        <span class="tab-hint">end of day</span>
+      </button>
+      <button class="tab" data-tab="journal">
+        <span class="tab-label">Journal</span>
+        <span class="tab-hint">whenever</span>
+      </button>
+      <button class="tab" data-tab="expenses">
+        <span class="tab-label">Expenses</span>
+        <span class="tab-hint">planned & saved</span>
+      </button>
+      <button class="tab" data-tab="dashboard">
+        <span class="tab-label">Dashboard</span>
+        <span class="tab-hint">the pattern</span>
+      </button>
+    </nav>
+
+    <div class="rail-bottom">
+      <div class="streak-mini">
+        <div class="streak-mini-num" id="railStreak">0</div>
+        <div class="streak-mini-label">day streak</div>
+      </div>
+      <div class="rail-actions">
+        <button class="ghost-btn" id="exportBtn">Export data</button>
+        <label class="ghost-btn" for="importFile">Import data</label>
+        <input type="file" id="importFile" accept="application/json" hidden>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main content -->
+  <main class="content">
+
+    <!-- CHECK-IN -->
+    <section class="panel is-active" id="panel-checkin">
+      <header class="panel-head">
+        <h1>End-of-day check-in</h1>
+        <p class="panel-sub">One rule: never lie to the tracker. A bad day is data, not the end of the streak.</p>
+      </header>
+
+      <form id="checkinForm" class="form">
+
+        <div class="field-row">
+          <label for="ciDate">Log date</label>
+          <input type="date" id="ciDate" required>
+          <p class="field-note">Logging for 7 Aug at 12:30am on the 8th? Pick the 7th — the streak follows this date, not the clock.</p>
+        </div>
+
+        <div class="group">
+          <h2>Behaviours to watch</h2>
+          <p class="group-note">Answered honestly, not judged.</p>
+
+          <div class="yn-field" data-field="alcohol">
+            <span>Did I consume alcohol today?</span>
+            <div class="yn"><button type="button" data-val="no">No</button><button type="button" data-val="yes">Yes</button></div>
+          </div>
+          <div class="yn-field" data-field="cigarette">
+            <span>Did I smoke a cigarette today?</span>
+            <div class="yn"><button type="button" data-val="no">No</button><button type="button" data-val="yes">Yes</button></div>
+          </div>
+          <div class="yn-field" data-field="porn">
+            <span>Did I watch pornography today?</span>
+            <div class="yn"><button type="button" data-val="no">No</button><button type="button" data-val="yes">Yes</button></div>
+          </div>
+          <div class="yn-field" data-field="masturbate">
+            <span>Did I masturbate today?</span>
+            <div class="yn"><button type="button" data-val="no">No</button><button type="button" data-val="yes">Yes</button></div>
+          </div>
+          <div class="yn-field" data-field="impulsiveSex">
+            <span>Did I engage in sexual activity today that I later felt was impulsive, compulsive, or against my goals?</span>
+            <div class="yn"><button type="button" data-val="no">No</button><button type="button" data-val="yes">Yes</button></div>
+          </div>
+          <div class="yn-field" data-field="soughtContent">
+            <span>Did I deliberately seek sexual content/stimulation when I had decided not to?</span>
+            <div class="yn"><button type="button" data-val="no">No</button><button type="button" data-val="yes">Yes</button></div>
+          </div>
+          <div class="yn-field" data-field="chasingAttention">
+            <span>Did I spend significant time chasing attention, validation, or conversations with girls when I knew I should have been doing something else?</span>
+            <div class="yn"><button type="button" data-val="no">No</button><button type="button" data-val="yes">Yes</button></div>
+          </div>
+        </div>
+
+        <div class="group">
+          <h2>Routine that builds the day</h2>
+
+          <div class="yn-field three" data-field="workout">
+            <span>Did I complete my planned workout/activity today?</span>
+            <div class="yn"><button type="button" data-val="yes">Yes</button><button type="button" data-val="no">No</button><button type="button" data-val="rest">Rest day</button></div>
+          </div>
+          <div class="yn-field" data-field="workStudy">
+            <span>Did I follow my planned work/study routine?</span>
+            <div class="yn"><button type="button" data-val="no">No</button><button type="button" data-val="yes">Yes</button></div>
+          </div>
+          <div class="yn-field" data-field="avoidedScrolling">
+            <span>Did I avoid unnecessary scrolling/reels?</span>
+            <div class="yn"><button type="button" data-val="no">No</button><button type="button" data-val="yes">Yes</button></div>
+          </div>
+          <div class="yn-field" data-field="sleepRoutine">
+            <span>Did I follow my planned sleep/wake-up routine?</span>
+            <div class="yn"><button type="button" data-val="no">No</button><button type="button" data-val="yes">Yes</button></div>
+          </div>
+        </div>
+
+        <div class="group">
+          <h2>Money lost to it</h2>
+          <p class="group-note">Enter ₹0 if nothing was spent.</p>
+
+          <div class="yn-field" data-field="spentMoney">
+            <span>Did any of these habits cause me to spend money today?</span>
+            <div class="yn"><button type="button" data-val="no">No</button><button type="button" data-val="yes">Yes</button></div>
+          </div>
+
+          <div class="field-row">
+            <label for="ciAmount">How much money did I spend because of these habits today?</label>
+            <input type="number" id="ciAmount" min="0" step="1" placeholder="0" inputmode="numeric">
+          </div>
+
+          <div class="field-row">
+            <label>What was the money spent on?</label>
+            <div class="chip-group" id="ciSpentOn" data-multi="true">
+              <button type="button" class="chip" data-val="Alcohol">Alcohol</button>
+              <button type="button" class="chip" data-val="Cigarettes">Cigarettes</button>
+              <button type="button" class="chip" data-val="Sexual activity">Sexual activity</button>
+              <button type="button" class="chip" data-val="Dating/chasing someone">Dating/chasing someone</button>
+              <button type="button" class="chip" data-val="Travel/transport related to it">Travel/transport related to it</button>
+              <button type="button" class="chip" data-val="Food/drinks related to it">Food/drinks related to it</button>
+              <button type="button" class="chip" data-val="Other">Other</button>
+              <button type="button" class="chip" data-val="Nothing">Nothing</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="group">
+          <h2>Urges & triggers</h2>
+          <p class="group-note">Understanding the urge matters more than counting the failure.</p>
+
+          <div class="field-row">
+            <label for="ciUrge">How strong were my urges today? <span class="range-note">(1 = none, 10 = extremely strong)</span></label>
+            <div class="range-row">
+              <input type="range" id="ciUrge" min="1" max="10" step="1" value="1">
+              <span class="range-val" id="ciUrgeVal">1</span>
+            </div>
+          </div>
+
+          <div class="field-row">
+            <label>What triggered me today?</label>
+            <div class="chip-group" id="ciTriggers" data-multi="true">
+              <button type="button" class="chip" data-val="Stress">Stress</button>
+              <button type="button" class="chip" data-val="Loneliness">Loneliness</button>
+              <button type="button" class="chip" data-val="Boredom">Boredom</button>
+              <button type="button" class="chip" data-val="Social media">Social media</button>
+              <button type="button" class="chip" data-val="Sexual content">Sexual content</button>
+              <button type="button" class="chip" data-val="Talking to someone I'm attracted to">Talking to someone I'm attracted to</button>
+              <button type="button" class="chip" data-val="Alcohol/social environment">Alcohol/social environment</button>
+              <button type="button" class="chip" data-val="Work pressure">Work pressure</button>
+              <button type="button" class="chip" data-val="Negative emotions">Negative emotions</button>
+              <button type="button" class="chip" data-val="Lack of sleep">Lack of sleep</button>
+              <button type="button" class="chip" data-val="Being alone">Being alone</button>
+              <button type="button" class="chip" data-val="Late-night phone usage">Late-night phone usage</button>
+              <button type="button" class="chip" data-val="Nothing significant">Nothing significant</button>
+              <button type="button" class="chip" data-val="Other">Other</button>
+            </div>
+          </div>
+
+          <div class="yn-field three" data-field="choseDiscipline">
+            <span>Did I choose discipline when I had an urge?</span>
+            <div class="yn"><button type="button" data-val="yes">Yes</button><button type="button" data-val="no">No</button><button type="button" data-val="none">No significant urge</button></div>
+          </div>
+        </div>
+
+        <div class="group">
+          <h2>In your own words</h2>
+          <p class="group-note">No essay needed.</p>
+
+          <div class="field-row">
+            <label for="ciStruggle">What caused me to struggle today?</label>
+            <textarea id="ciStruggle" rows="2"></textarea>
+          </div>
+          <div class="field-row">
+            <label for="ciImprove">What will I do better tomorrow?</label>
+            <textarea id="ciImprove" rows="2"></textarea>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="primary-btn">Save today's check-in</button>
+          <span class="save-msg" id="ciSaveMsg"></span>
+        </div>
+      </form>
+
+      <div class="history">
+        <h2>Recent check-ins</h2>
+        <div id="ciHistory" class="history-list"></div>
+      </div>
+    </section>
+
+    <!-- JOURNAL -->
+    <section class="panel" id="panel-journal">
+      <header class="panel-head">
+        <h1>Journal</h1>
+        <p class="panel-sub">A thought, a memory, a song, a lesson, a plan, a feeling — a few words are enough. One day these become your story.</p>
+      </header>
+
+      <form id="journalForm" class="form">
+        <div class="field-row">
+          <label for="jCategory">What would you like to write about?</label>
+          <select id="jCategory">
+            <option>Life Updates</option>
+            <option>💭 Quick Thought</option>
+            <option>📖 Dear Diary</option>
+            <option>💡 Tips & Tricks</option>
+            <option>✍️ Shayari / Poetry / Quote</option>
+            <option>✅ To-Do</option>
+            <option>🎯 To Plan</option>
+            <option>🧠 Realisation</option>
+            <option>❤️ Feeling</option>
+            <option>📸 Memory</option>
+            <option>🌱 Idea</option>
+            <option>🎵 Song/Movies/Series/Books</option>
+            <option>Breaking News</option>
+            <option>Random Updates</option>
+            <option>Problem &amp; Solution</option>
+            <option>What I want to do</option>
+            <option value="__other">Other…</option>
+          </select>
+          <input type="text" id="jCategoryOther" placeholder="Name this category" hidden>
+        </div>
+
+        <div class="field-row">
+          <label for="jText">Write it down</label>
+          <textarea id="jText" rows="6" placeholder="This is your space. Write exactly how you think. No judgement, no rules."></textarea>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="primary-btn">Add entry</button>
+          <span class="save-msg" id="jSaveMsg"></span>
+        </div>
+      </form>
+
+      <div class="history">
+        <div class="history-head">
+          <h2>Entries</h2>
+          <div class="history-controls">
+            <input type="text" id="jSearch" placeholder="Search entries…">
+            <select id="jFilter"><option value="">All categories</option></select>
+          </div>
+        </div>
+        <div id="jHistory" class="history-list journal-list"></div>
+      </div>
+    </section>
+
+    <!-- EXPENSES -->
+    <section class="panel" id="panel-expenses">
+      <header class="panel-head">
+        <h1>Upcoming expenses & savings</h1>
+        <p class="panel-sub">Planned purchases, priorities, and what you need to save toward each one.</p>
+      </header>
+
+      <form id="expenseForm" class="form">
+        <div class="field-row-group">
+          <div class="field-row">
+            <label for="eType">Type of expense</label>
+            <select id="eType">
+              <option>To Buy</option>
+              <option>Upcoming Expense</option>
+              <option>To Invest</option>
+              <option value="__other">Other…</option>
+            </select>
+            <input type="text" id="eTypeOther" placeholder="Describe the type" hidden>
+          </div>
+          <div class="field-row">
+            <label for="ePriority">Priority level</label>
+            <select id="ePriority">
+              <option value="High">High priority — must-have</option>
+              <option value="Medium">Medium priority — important but flexible</option>
+              <option value="Low">Low priority — nice-to-have</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field-row">
+          <label for="eDesc">Item / expense description</label>
+          <input type="text" id="eDesc" placeholder="What do you need or plan to buy?">
+        </div>
+
+        <div class="field-row-group">
+          <div class="field-row">
+            <label for="eAmount">Estimated amount (₹)</label>
+            <input type="number" id="eAmount" min="0" step="1" placeholder="0">
+          </div>
+          <div class="field-row">
+            <label for="eDate">Target date</label>
+            <input type="date" id="eDate">
+          </div>
+        </div>
+
+        <div class="field-row-group">
+          <div class="field-row">
+            <label for="eCategory">Category</label>
+            <input type="text" id="eCategory" list="eCategoryList" placeholder="e.g. Tech, Travel, Home">
+            <datalist id="eCategoryList">
+              <option value="Tech">
+              <option value="Travel">
+              <option value="Home">
+              <option value="Health">
+              <option value="Investment">
+              <option value="Clothing">
+              <option value="Education">
+              <option value="Gifts">
+            </datalist>
+          </div>
+          <div class="field-row">
+            <label for="eLink">Product link / reference (optional)</label>
+            <input type="url" id="eLink" placeholder="https://…">
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="primary-btn">Add to list</button>
+          <span class="save-msg" id="eSaveMsg"></span>
+        </div>
+      </form>
+
+      <div class="history">
+        <div class="history-head">
+          <h2>Planned list</h2>
+          <div class="history-controls">
+            <select id="eSort">
+              <option value="date">Sort by target date</option>
+              <option value="priority">Sort by priority</option>
+              <option value="amount">Sort by amount</option>
+            </select>
+            <label class="check-inline"><input type="checkbox" id="eHideDone"> Hide purchased</label>
+          </div>
+        </div>
+        <div class="expense-summary" id="eSummary"></div>
+        <div id="eHistory" class="history-list expense-list"></div>
+      </div>
+    </section>
+
+    <!-- DASHBOARD -->
+    <section class="panel" id="panel-dashboard">
+      <header class="panel-head">
+        <h1>The pattern</h1>
+        <p class="panel-sub">What the days add up to.</p>
+      </header>
+
+      <div class="dash-grid">
+        <div class="dash-card big-num">
+          <div class="big-num-value" id="dCurrentStreak">0</div>
+          <div class="big-num-label">current clean streak (days)</div>
+        </div>
+        <div class="dash-card big-num">
+          <div class="big-num-value" id="dBestStreak">0</div>
+          <div class="big-num-label">best streak so far</div>
+        </div>
+        <div class="dash-card big-num">
+          <div class="big-num-value" id="dMoneyMonth">₹0</div>
+          <div class="big-num-label">spent on habits this month</div>
+        </div>
+        <div class="dash-card big-num">
+          <div class="big-num-value" id="dMoneyTotal">₹0</div>
+          <div class="big-num-label">spent on habits, all time</div>
+        </div>
+      </div>
+
+      <div class="dash-card">
+        <h2>Last 12 weeks</h2>
+        <p class="dash-note">Each square is a day. Sage means clean, rust means a slip was logged, grey means no entry.</p>
+        <div id="heatmap" class="heatmap"></div>
+        <div class="heatmap-legend">
+          <span><i class="sw sw-good"></i> clean day</span>
+          <span><i class="sw sw-slip"></i> slip logged</span>
+          <span><i class="sw sw-empty"></i> no entry</span>
+        </div>
+      </div>
+
+      <div class="dash-row">
+        <div class="dash-card">
+          <h2>Urge intensity over time</h2>
+          <canvas id="urgeChart" height="220"></canvas>
+        </div>
+        <div class="dash-card">
+          <h2>Most common triggers</h2>
+          <canvas id="triggerChart" height="220"></canvas>
+        </div>
+      </div>
+
+      <div class="dash-row">
+        <div class="dash-card">
+          <h2>Money lost to habits, by day</h2>
+          <canvas id="moneyChart" height="220"></canvas>
+        </div>
+        <div class="dash-card">
+          <h2>Upcoming expenses by priority</h2>
+          <canvas id="expenseChart" height="220"></canvas>
+        </div>
+      </div>
+
+      <div class="dash-card">
+        <h2>Journal, at a glance</h2>
+        <div class="journal-stats" id="journalStats"></div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
